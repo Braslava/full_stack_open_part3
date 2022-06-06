@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const port = 3001;
-const persons = require("./data");
+let persons = require("./data");
 
 const date = new Date();
 
@@ -27,6 +27,13 @@ app.get("/api/persons/:id", (req, res) => {
         res.status(404).end();
     }
 });
+
+app.delete('/api/persons/:id', (req, res) => {
+    const id = Number(req.params.id)
+    persons = persons.filter(person => person.id !== id)
+  
+    res.status(204).end()
+  })
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
