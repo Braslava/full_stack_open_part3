@@ -5,7 +5,14 @@ let persons = require("./data");
 
 app.use(express.json());
 
-//console.log(persons);
+const morgan = require("morgan");
+
+//app.use(morgan("tiny"));
+morgan.token("body", function (req, res) {
+    return JSON.stringify(req.body);
+})
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms :body"))
+
 app.get("/api/persons", (req, res) => {
     res.json(persons);
 });
@@ -38,6 +45,8 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (request, response) => {
     const body = request.body;
+    console.log(body);
+
     const numberExists = persons.find(
         (person) => person.number === body.number
     );
@@ -61,7 +70,7 @@ app.post("/api/persons", (request, response) => {
         const id = Math.floor(Math.random() * 9000);
         console.log(id);
         return id;
-    }
+    };
 
     const person = {
         content: body.name,
