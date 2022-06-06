@@ -16,6 +16,18 @@ app.get("/info", (req, res) => {
     );
 });
 
+app.get("/api/persons/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    console.log(id);
+    const person = persons.find((person) => person.id === id);
+    if (person) {
+        res.json(person);
+        console.log(person);
+    } else {
+        res.status(404).end();
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
