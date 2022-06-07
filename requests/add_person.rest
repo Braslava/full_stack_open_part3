@@ -1,7 +1,7 @@
-POST http://localhost:3001/api/persons/
+POST https://intense-basin-30125.herokuapp.com/api/persons
 content-type: application/json
 
 {
     "name": "Anna Smith",
-    "number": "92-43-2093450"
+    "number": "92-43-2093490"
 }

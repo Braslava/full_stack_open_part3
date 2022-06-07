@@ -75,7 +75,7 @@ app.post("/api/persons", (request, response) => {
     };
 
     const person = {
-        content: body.name,
+        name: body.name,
         number: body.number,
         id: generateId(),
     };
