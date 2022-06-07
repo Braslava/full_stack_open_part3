@@ -7,7 +7,7 @@ let persons = require("./data");
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("build"));
+app.use(express.static("static"));
 
 //app.use(morgan("tiny"));
 morgan.token("body", function (req, res) {
