@@ -19,6 +19,10 @@ app.use(
     )
 );
 
+app.get("/",  (req, res) => {
+    res.sendFile(path.join("build/index.html"));
+  });
+
 app.get("/api/persons", (req, res) => {
     res.json(persons);
 });
