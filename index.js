@@ -1,19 +1,23 @@
 const express = require("express");
 const morgan = require("morgan");
-const cors = require('cors')
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3001;
 let persons = require("./data");
 
-
-app.use(cors())
+app.use(cors());
 app.use(express.json());
+app.use(express.static("build"));
 
 //app.use(morgan("tiny"));
 morgan.token("body", function (req, res) {
     return JSON.stringify(req.body);
-})
-app.use(morgan(":method :url :status :res[content-length] - :response-time ms :body"))
+});
+app.use(
+    morgan(
+        ":method :url :status :res[content-length] - :response-time ms :body"
+    )
+);
 
 app.get("/api/persons", (req, res) => {
     res.json(persons);
