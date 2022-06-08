@@ -19,10 +19,6 @@ app.use(
     )
 );
 
-// app.get("/",  (req, res) => {
-//     res.sendFile(path.join("build/index.html"));
-//   });
-
 app.get("/api/persons", (req, res) => {
     res.json(persons);
 });
@@ -57,10 +53,8 @@ app.post("/api/persons", (request, response) => {
     const body = request.body;
     console.log(body);
 
-    const numberExists = persons.find(
-        (person) => person.number === body.number
-    );
-    console.log(numberExists);
+    const nameExists = persons.find((person) => person.name === body.name);
+    console.log(nameExists);
     console.log(body);
     if (!body.name) {
         return response.status(400).json({
@@ -70,9 +64,9 @@ app.post("/api/persons", (request, response) => {
         return response.status(400).json({
             error: "number missing",
         });
-    } else if (numberExists) {
+    } else if (nameExists) {
         return response.status(400).json({
-            error: "number already exists",
+            error: "name already exists",
         });
     }
 
@@ -89,6 +83,7 @@ app.post("/api/persons", (request, response) => {
     };
 
     persons = persons.concat(person);
+    console.log("newPerson", person);
     response.json(person);
 });
 
