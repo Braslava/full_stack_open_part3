@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const Person = require("./models/person");
+const { response } = require("express");
 //let persons = require("./data");
 
 const app = express();
@@ -23,6 +24,8 @@ app.use(
     )
 );
 
+// requests
+
 app.get("/api/persons", (req, res) => {
     Person.find({}).then((persons) => {
         res.json(persons);
@@ -31,40 +34,45 @@ app.get("/api/persons", (req, res) => {
 
 app.get("/info", (req, res) => {
     const date = new Date();
-    res.send(
-        `<p>The phonebook has ${persons.length} entries</p><p>${date}</p>`
-    );
+    Person.find({}).then((persons) => {
+        res.send(
+            `<p>The phonebook has ${persons.length} entries</p><p>${date}</p>`
+        );
+    });
+    // res.send(
+    //     `<p>The phonebook has ${persons.length} entries</p><p>${date}</p>`
+    // );
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
     console.log(req.params.id);
     Person.findById(req.params.id)
-    .then(person => {
-      if (person) {
-        res.json(person)
-      } else {
-        res.status(404).end()
-      }
-    })
-    .catch(error => {
-      next(error)
-    })
+        .then((person) => {
+            if (person) {
+                res.json(person);
+            } else {
+                res.status(404).end();
+            }
+        })
+        .catch((error) => {
+            next(error);
+        });
 });
 
-app.delete("/api/persons/:id", (req, res) => {
-    const id = Number(req.params.id);
-    persons = persons.filter((person) => person.id !== id);
-
-    res.status(204).end();
+app.delete("/api/persons/:id", (req, res, next) => {
+    Person.findByIdAndRemove(req.params.id)
+        .then((result) => {
+            res.status(204).end();
+        })
+        .catch((err) => next(err));
 });
 
 app.post("/api/persons", (req, res) => {
     const name = req.body.name;
     const number = req.body.number;
     console.log(name, number);
-    // const nameExists = persons.find((person) => person.name === body.name);
-    // console.log(nameExists);
-    // console.log(body);
+    //  const existingPerson = Person.findOne({ name: name }).exec();
+
     if (!name) {
         return res.status(400).json({
             error: "name missing",
@@ -74,20 +82,27 @@ app.post("/api/persons", (req, res) => {
             error: "number missing",
         });
     }
-    // } else if (nameExists) {
-    //     return response.status(400).json({
-    //         error: "name already exists",
-    //     });
-    // }
     const person = new Person({
         name: name,
         number: number,
     });
     person.save().then((savedPerson) => res.json(savedPerson));
+});
 
-    // persons = persons.concat(person);
-    // console.log("newPerson", person);
-    // response.json(person);
+app.put("/api/persons/:id", (req, res, next) => {
+    const name = req.body.name;
+    const number = req.body.number;
+    console.log(name, number);
+
+    const person = {
+        name: name,
+        number: number,
+    };
+    Person.findByIdAndUpdate(req.params.id, person, { new: true })
+        .then((updatedPerson) => {
+            res.json(updatedPerson);
+        })
+        .catch((error) => next(error));
 });
 
 const unknownEndpoint = (req, res) => {
@@ -95,6 +110,19 @@ const unknownEndpoint = (req, res) => {
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+    console.error(error.message);
+
+    if (error.name === "CastError") {
+        return res.status(400).send({ error: "malformatted id" });
+    }
+
+    next(error);
+};
+
+// this has to be the last loaded middleware.
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}`);
