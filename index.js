@@ -39,9 +39,6 @@ app.get("/info", (req, res) => {
             `<p>The phonebook has ${persons.length} entries</p><p>${date}</p>`
         );
     });
-    // res.send(
-    //     `<p>The phonebook has ${persons.length} entries</p><p>${date}</p>`
-    // );
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
@@ -71,17 +68,15 @@ app.post("/api/persons", (req, res, next) => {
     const name = req.body.name;
     const number = req.body.number;
     console.log(name, number);
-    //  const existingPerson = Person.findOne({ name: name }).exec();
 
-    if (!name) {
-        return res.status(400).json({
-            error: "name missing",
-        });
-    } else if (!number) {
-        return res.status(400).json({
-            error: "number missing",
-        });
-    }
+    Person.exists({ name: name }).then((nameExists) => {
+        if (nameExists) {
+            res.status(400).json({
+                error: "This name is already in the phonebook",
+            });
+        }
+    });    
+
     const person = new Person({
         name: name,
         number: number,
