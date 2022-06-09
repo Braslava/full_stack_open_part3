@@ -1,9 +1,13 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+require("dotenv").config();
+
+const Person = require("./models/person");
+//let persons = require("./data");
+
 const app = express();
-const PORT = process.env.PORT || 3001;
-let persons = require("./data");
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
@@ -20,7 +24,9 @@ app.use(
 );
 
 app.get("/api/persons", (req, res) => {
-    res.json(persons);
+    Person.find({}).then((persons) => {
+        res.json(persons);
+    });
 });
 
 app.get("/info", (req, res) => {
@@ -30,16 +36,19 @@ app.get("/info", (req, res) => {
     );
 });
 
-app.get("/api/persons/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-    console.log(id);
-    const person = persons.find((person) => person.id === id);
-    if (person) {
-        res.json(person);
-        console.log(person);
-    } else {
-        res.status(404).end();
-    }
+app.get("/api/persons/:id", (req, res, next) => {
+    console.log(req.params.id);
+    Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => {
+      next(error)
+    })
 });
 
 app.delete("/api/persons/:id", (req, res) => {
@@ -49,43 +58,43 @@ app.delete("/api/persons/:id", (req, res) => {
     res.status(204).end();
 });
 
-app.post("/api/persons", (request, response) => {
-    const body = request.body;
-    console.log(body);
-
-    const nameExists = persons.find((person) => person.name === body.name);
-    console.log(nameExists);
-    console.log(body);
-    if (!body.name) {
-        return response.status(400).json({
+app.post("/api/persons", (req, res) => {
+    const name = req.body.name;
+    const number = req.body.number;
+    console.log(name, number);
+    // const nameExists = persons.find((person) => person.name === body.name);
+    // console.log(nameExists);
+    // console.log(body);
+    if (!name) {
+        return res.status(400).json({
             error: "name missing",
         });
-    } else if (!body.number) {
-        return response.status(400).json({
+    } else if (!number) {
+        return res.status(400).json({
             error: "number missing",
         });
-    } else if (nameExists) {
-        return response.status(400).json({
-            error: "name already exists",
-        });
     }
+    // } else if (nameExists) {
+    //     return response.status(400).json({
+    //         error: "name already exists",
+    //     });
+    // }
+    const person = new Person({
+        name: name,
+        number: number,
+    });
+    person.save().then((savedPerson) => res.json(savedPerson));
 
-    const generateId = () => {
-        const id = Math.floor(Math.random() * 9000);
-        console.log(id);
-        return id;
-    };
-
-    const person = {
-        name: body.name,
-        number: body.number,
-        id: generateId(),
-    };
-
-    persons = persons.concat(person);
-    console.log("newPerson", person);
-    response.json(person);
+    // persons = persons.concat(person);
+    // console.log("newPerson", person);
+    // response.json(person);
 });
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
 
 app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}`);
