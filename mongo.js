@@ -1,3 +1,5 @@
+// This file is for development purposes only
+
 const mongoose = require("mongoose");
 
 if (process.argv.length < 3) {

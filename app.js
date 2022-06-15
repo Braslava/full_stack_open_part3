@@ -26,7 +26,7 @@ app.use(middleware.morganConfig);
 app.use("/api/persons", personsRouter);
 
 app.use(middleware.unknownEndpoint);
-// this has to be the last loaded middleware.
+// errorHandler has to be the last loaded middleware.
 app.use(middleware.errorHandler);
 
 module.exports = app;
